@@ -68,6 +68,41 @@ chmod +x transfer.sh
 ./transfer.sh gta@192.168.0.6 # usar endereço certo
 ```
 
+## Configurações do GPIO no Raspberry
+
+```bash
+sudo apt update
+sudo apt install python3-dev gcc
+```
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install RPi.GPIO
+```
+
+## Rodando o código de coleta
+
+```bash
+cd spectrum_sensor
+mkdir data
+python main.py
+```
+
+Em outro terminal:
+
+```bash
+cd spectrum_sensor
+python sw_interrupt.py start
+```
+
+Para interromper a coleta
+
+```bash
+cd spectrum_sensor
+python sw_interrupt.py stop
+```
+
 ## Dificuldades encontradas
 
 * Versão certa do pyrtlsdr pro meu HW

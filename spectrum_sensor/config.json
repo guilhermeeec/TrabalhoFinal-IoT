@@ -1,0 +1,18 @@
+{
+    "csv_dir": "./data",
+    "interrupt_mode": "sw_interrupt",
+    "gpio_pin_start": 17,
+    "gpio_pin_stop": 27,
+    "fonte": "RafaelSDR",
+    "operadora": "-",
+    "geracao": "HSPA",
+    "freq_dl": 882800000.0,
+    "freq_ul": 837800000.0,
+    "larg_banda": 5000000.0,
+    "channel": "UL",
+    "bw_reduction_ratio": 5.0,
+    "gain": "auto",
+    "wait_time": 1.0,
+    "num_samples": 16384,
+    "calibration_offset": -30.0
+}
