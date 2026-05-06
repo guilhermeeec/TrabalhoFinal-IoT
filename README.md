@@ -145,6 +145,7 @@ sudo apt install swig python3-dev build-essential liblgpio-dev
 python -m venv .env
 source .env/bin/activate
 pip install rpi-lgpio
+pip install RPi.GPIO
 ```
 
 ## Rodando o código de coleta no PC

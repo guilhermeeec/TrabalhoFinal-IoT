@@ -6,10 +6,12 @@ from gps import get_gps_position
 from sdr import Sdr
 from fsm import FSM
 
-def working_loop(fsm, config, dataset, sdr_device):
+def working_loop(fsm, config, sdr_device):
     """Loop isolado que roda apenas enquanto o estado for 'working'"""
     print(">>> Iniciando loop de captura (WORKING)...")
-    
+
+    dataset = Data(config['csv_dir'], config)
+    dataset.create_csv_file()
     while fsm.is_working():
         power_dbm = sdr_device.get_channel_power_dbm()
         lat, lon = get_gps_position(config)
@@ -25,8 +27,6 @@ def main():
         f.write(str(os.getpid()))
 
     config = load_params('config.json')
-    dataset = Data(config['csv_dir'], config)
-    dataset.create_csv_file()
     
     # Inicializa a Máquina de Estados
     fsm = FSM(
@@ -43,7 +43,7 @@ def main():
         while True:
             if fsm.is_working():
                 # Entra no loop de trabalho e fica lá enquanto a flag for verdadeira
-                working_loop(fsm, config, dataset, sdr_device)
+                working_loop(fsm, config, sdr_device)
             else:
                 # Sistema no estado 'waiting'
                 # Dorme um pouco para não fritar a CPU do Raspberry com um loop vazio
