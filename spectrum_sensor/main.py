@@ -12,7 +12,7 @@ def working_loop(fsm, config, dataset, sdr_device):
     
     while fsm.is_working():
         power_dbm = sdr_device.get_channel_power_dbm()
-        lat, lon = get_gps_position()
+        lat, lon = get_gps_position(config)
         dataset.insert_into_csv(power_dbm, lat, lon)
         time.sleep(config['wait_time'])
         

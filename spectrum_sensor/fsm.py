@@ -1,4 +1,5 @@
 import signal
+import time
 
 class FSM:
     def __init__(self, mode, pin_start=None, pin_stop=None):
@@ -24,7 +25,9 @@ class FSM:
             # Configura pinos como entrada e ativa os resistores pull-up internos
             GPIO.setup(self.pin_start, GPIO.IN, pull_up_down=GPIO.PUD_UP)
             GPIO.setup(self.pin_stop, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-            
+
+            time.sleep(0.5)
+
             # Configura as interrupções para borda de descida (botão apertado = GND = Falling)
             # O bouncetime previne múltiplas leituras pelo repique do botão mecânico
             GPIO.add_event_detect(self.pin_start, GPIO.FALLING, callback=self._start_handler, bouncetime=300)
@@ -45,7 +48,7 @@ class FSM:
             print("\n>>> [Sinal/Interrupção] Mudando estado para: WAITING")
             self._is_working = False
 
-    def is_working(self):
+    def is_woqrking(self):
         return self._is_working
 
     def is_waiting(self):

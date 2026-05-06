@@ -50,13 +50,72 @@ pip install pyrtlsdr==0.2.91
 ## Testando em Python
 
 ```bash
-$ python3 spectrum_sensor/test.py
+$ python3 spectrum_sensor/test_sdr.py
 Detached kernel driver
 Found Rafael Micro R820T tuner
 [R82XX] PLL not locked!
 Read 512 samples successfully.
 [(-0.0039215686274509665+0.0117647058823529j), (-0.0039215686274509665+0.0039215686274509665j), (0.0039215686274509665-0.0039215686274509665j), (-0.0039215686274509665-0.0039215686274509665j), (-0.0039215686274509665-0.0039215686274509665j), (-0.0039215686274509665+0.0039215686274509665j), (-0.0117647058823529+0.0039215686274509665j), (0.0039215686274509665+0.0039215686274509665j), (0.0039215686274509665-0.0117647058823529j), (0.0039215686274509665+0.0039215686274509665j)]
 Reattached kernel driver
+```
+
+## Instalação do Arduino CLI
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=~ sh
+sudo mv ~/arduino-cli /bin
+arduino-cli core update-index
+arduino-cli core install arduino:avr
+```
+
+Conecte o Ardino e pegue as configurações:
+
+```bash
+arduino-cli board list
+```
+
+Resultado guapimirim:
+
+```bash
+Port         Protocol Type              Board Name  FQBN            Core
+/dev/ttyACM0 serial   Serial Port (USB) Arduino UNO arduino:avr:uno arduino:avr
+/dev/ttyS0   serial   Serial Port       Unknown
+```
+
+Resultado Raspberry:
+
+```bash
+Port         Protocol Type              Board Name  FQBN            Core
+/dev/ttyACM0 serial   Serial Port (USB) Arduino UNO arduino:avr:uno arduino:avr
+```
+
+## Testando o Arduino
+
+```bash
+cd arduino_gps/test
+arduino-cli compile --fqbn arduino:avr:uno 
+arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:uno
+cd ../..
+```
+
+## Instalação da biblioteva TinyGPS no Arduino
+
+```bash
+arduino-cli lib install "TinyGPSPlus"
+```
+
+## Testando o GPS
+
+```bash
+cd arduino_gps/gps
+arduino-cli compile --fqbn arduino:avr:uno 
+arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:uno
+cd ../..
+```
+
+```bash
+cd spectrum_sensor
+python test_gps.py
 ```
 
 ## Transferência para o Raspberry
@@ -76,12 +135,12 @@ sudo apt install python3-dev gcc
 ```
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
+python -m venv .env
+source .env/bin/activate
 pip install RPi.GPIO
 ```
 
-## Rodando o código de coleta
+## Rodando o código de coleta no PC
 
 ```bash
 cd spectrum_sensor
@@ -112,3 +171,4 @@ python sw_interrupt.py stop
 
 * Estou usando o Raspberry Pi 4 com etiqueta escrito `2`.
 * Em casa, as características são as seguintes: raspberry `d8:3a:dd:1a:fe:5e 192.168.0.6`
+* No lab, após reinstalar o sistema: raspberry: `146.164.69.232`
