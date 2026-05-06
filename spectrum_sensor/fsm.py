@@ -14,30 +14,28 @@ class FSM:
             print("FSM: Modo SW_INTERRUPT. Aguardando sinais SIGUSR1(Start) e SIGUSR2(Stop).")
             
         elif self.mode == "hw_interrupt":
-            # O RPi.GPIO só é importado se o modo for hardware, 
-            # evitando erros caso você rode o código de testes no seu PC.
-            import RPi.GPIO as GPIO
+            # Substitui RPi.GPIO pelo gpiozero
+            from gpiozero import Button
             
             self.pin_start = pin_start
             self.pin_stop = pin_stop
             
-            GPIO.setmode(GPIO.BCM)
-            # Configura pinos como entrada e ativa os resistores pull-up internos
-            GPIO.setup(self.pin_start, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-            GPIO.setup(self.pin_stop, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            # O gpiozero já configura como entrada e usa pull-up interno por padrão.
+            # O bounce_time no gpiozero é em segundos (0.3 = 300ms).
+            self.button_start = Button(self.pin_start, pull_up=True, bounce_time=0.3)
+            self.button_stop = Button(self.pin_stop, pull_up=True, bounce_time=0.3)
 
-            time.sleep(0.5)
-
-            # Configura as interrupções para borda de descida (botão apertado = GND = Falling)
-            # O bouncetime previne múltiplas leituras pelo repique do botão mecânico
-            GPIO.add_event_detect(self.pin_start, GPIO.FALLING, callback=self._start_handler, bouncetime=300)
-            GPIO.add_event_detect(self.pin_stop, GPIO.FALLING, callback=self._stop_handler, bouncetime=300)
+            # Associa os eventos (quando pressionado = FALLING) às funções de callback
+            self.button_start.when_pressed = self._start_handler
+            self.button_stop.when_pressed = self._stop_handler
             
-            print(f"FSM: Modo HW_INTERRUPT. Pinos GPIO: Start({pin_start}), Stop({pin_stop}).")
+            print(f"FSM: Modo HW_INTERRUPT. Pinos GPIO (gpiozero): Start({pin_start}), Stop({pin_stop}).")
             
         else:
             raise ValueError(f"Modo de interrupção '{mode}' desconhecido.")
 
+    # O *args é mantido para compatibilidade com o módulo 'signal',
+    # que envia argumentos (número do sinal e frame) ao callback.
     def _start_handler(self, *args):
         if not self._is_working:
             print("\n>>> [Sinal/Interrupção] Mudando estado para: WORKING")
@@ -48,7 +46,7 @@ class FSM:
             print("\n>>> [Sinal/Interrupção] Mudando estado para: WAITING")
             self._is_working = False
 
-    def is_woqrking(self):
+    def is_working(self): # Corrigido o erro de digitação (era is_woqrking)[cite: 1]
         return self._is_working
 
     def is_waiting(self):
@@ -56,5 +54,9 @@ class FSM:
     
     def cleanup(self):
         if self.mode == "hw_interrupt":
-            import RPi.GPIO as GPIO
-            GPIO.cleanup()
+            # O gpiozero faz a limpeza automática ao final do script, 
+            # mas podemos fechar as conexões explicitamente para garantir.[cite: 1]
+            if hasattr(self, 'button_start'):
+                self.button_start.close()
+            if hasattr(self, 'button_stop'):
+                self.button_stop.close()

@@ -132,12 +132,13 @@ chmod +x transfer.sh
 ```bash
 sudo apt update
 sudo apt install python3-dev gcc
+sudo apt install swig python3-dev build-essential liblgpio-dev
 ```
 
 ```bash
 python -m venv .env
 source .env/bin/activate
-pip install RPi.GPIO
+pip install rpi-lgpio
 ```
 
 ## Rodando o código de coleta no PC
