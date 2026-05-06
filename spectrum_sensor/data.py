@@ -85,6 +85,7 @@ class Data:
                 
                 if response.status_code == 200:
                     print(f"Sucesso: Arquivo {self.filename} enviado com êxito.")
+                    os.remove(self.full_path)
                     return # Sai da função se o upload der certo
                 else:
                     print(f"Erro no servidor ({response.status_code}): Tentativa {i+1}/{max_retries}")

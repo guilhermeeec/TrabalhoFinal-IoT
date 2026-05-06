@@ -1,0 +1,15 @@
+services:
+  flask-upload:
+    build: .
+    container_name: sdr_upload_server
+    restart: unless-stopped
+    ports:
+      # Mapeia a porta do Host para a porta do Container (ex: 8080:5000)
+      - "${HOST_PORT}:${CONTAINER_PORT}"
+    volumes:
+      # Mapeia a pasta do Host para a pasta do Container
+      - "${UPLOAD_DIR_HOST}:${UPLOAD_DIR_CONTAINER}"
+    environment:
+      # Injeta essas variáveis no sistema operacional do container para o app.py ler
+      - CONTAINER_PORT=${CONTAINER_PORT}
+      - UPLOAD_DIR_CONTAINER=${UPLOAD_DIR_CONTAINER}

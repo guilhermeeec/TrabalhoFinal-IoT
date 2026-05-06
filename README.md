@@ -7,6 +7,12 @@ Requisitos:
 pip install -r spectrum_sensor/requirements.txt
 ```
 
+## Descobrindo o IP do Raspberry
+
+```bash
+arp -a | grep d8:3a:dd:1a:fe:5e
+```
+
 ## Instalação RTL SDR do SMT - Alternativa 1, testada no PC
 
 ```bash
@@ -31,7 +37,7 @@ sudo apt install rtl-sdr librtlsdr-dev -y
 
 Adicione as seguintes linhas ao arquivo `/etc/modprobe.d/blacklist-rtl.conf`:
 
-```
+```conf
 blacklist dvb_usb_rtl28xxu
 blacklist rtl2832
 blacklist rtl2830
@@ -163,13 +169,44 @@ cd spectrum_sensor
 python sw_interrupt.py stop
 ```
 
+## Configuração do servidor de arquivos
+
+Requisito: Docker
+
+Edite as duas primeiras linhas de `files_server/.env`
+
+```bash
+cd files_server
+mkdir from_sensors
+mkdir maps
+```
+
+Iniciando servidor de teste
+
+```bash
+docker compose up -d
+docker logs sdr_upload_server -f
+```
+
+Enviando arquivo de teste
+
+```bash
+curl -F "file=@test.csv" http://localhost:9632/upload
+```
+
 ## Dificuldades encontradas
 
 * Versão certa do pyrtlsdr pro meu HW
 * HW limitado a 2.4MHz de banda
+* Indisponibilidade do módulo GPS para raspberry
+* Baixa qualidade dos botões
+* 
 
 ## Notas
 
 * Estou usando o Raspberry Pi 4 com etiqueta escrito `2`.
 * Em casa, as características são as seguintes: raspberry `d8:3a:dd:1a:fe:5e 192.168.0.6`
-* No lab, após reinstalar o sistema: raspberry: `146.164.69.232`
+* No lab, após reinstalar o sistema: raspberry: `146.164.69.232` (não é `171`, pois essa é a Ossos)
+* O Raspberry está configurado para acessar meu roteador do celular. Para saber a rota de saída usada: `ip route get 8.8.8.8`
+* Cópia do Raspberry para a guapimirim da Guapimirim: `scp raspiot:/home/gta/TrabalhoFinal-IoT/spectrum_sensor/data/scan_20260506_164448.csv files_server/test.csv`
+* No raspberry, precisei usar `sudo apt-get -o Acquire::ForceIPv4=true install git-all` para instalar o Git

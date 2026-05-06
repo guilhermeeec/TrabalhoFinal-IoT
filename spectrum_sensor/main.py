@@ -17,7 +17,7 @@ def working_loop(fsm, config, dataset, sdr_device):
         time.sleep(config['wait_time'])
         
     print(">>> Saindo do loop de captura. Sistema em espera.")
-    # Exemplo: dataset.send_data(config['server_url']) 
+    dataset.send_data(config['server_url']) 
 
 def main():
     # Salva o PID do processo atual para o script de testes encontrar
