@@ -1,13 +1,34 @@
 import serial
 import time
-# Substituímos a importação do RPi.GPIO pelo gpiozero
-from gpiozero import DigitalOutputDevice
+import RPi.GPIO as GPIO
 
-def get_gps_position(config:dict)->tuple[float, float]:
-    # Verifica se deve usar o GPS real ou retornar mock
-    if not config.get("real_gps", True): 
-        return -22.9068, -43.1729
+def nmea_to_decimal(nmea_val: str, direction: str, is_lon: bool = False) -> float:
+    """
+    Converte o formato NMEA (DDMM.MMMMM para Lat, DDDMM.MMMMM para Lon) 
+    para Graus Decimais (float).
+    """
+    if not nmea_val:
+        return 0.0
     
+    # A longitude tem 3 dígitos de graus iniciais, a latitude tem 2
+    graus_len = 3 if is_lon else 2
+    
+    graus = float(nmea_val[:graus_len])
+    minutos = float(nmea_val[graus_len:])
+    
+    decimal = graus + (minutos / 60.0)
+    
+    # Sul (S) e Oeste (W) são coordenadas negativas
+    if direction in ['S', 'W']:
+        decimal *= -1.0
+        
+    return round(decimal, 6)
+
+def get_gps_position(config: dict) -> tuple[float, float]:
+    """
+    Lê a posição GPS bruta via NMEA (sentença $GPGGA), converte para decimal
+    e aciona um pino GPIO pelo tempo configurado.
+    """
     port = config.get('port', '/dev/serial0')
     baud = config.get('baud', 9600)
     gpio_pin_out = config.get("gpio_pin_out", 18)
@@ -15,59 +36,61 @@ def get_gps_position(config:dict)->tuple[float, float]:
 
     lat, lon = 0.0, 0.0
 
-    # Configuração do GPIO com gpiozero
-    # Não precisamos mais de setmode ou setup. A classe DigitalOutputDevice
-    # já configura o pino BCM como saída (OUT) automaticamente.
-    pino_bip = DigitalOutputDevice(gpio_pin_out)
+    # Configuração do GPIO
+    GPIO.setwarnings(False) 
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(gpio_pin_out, GPIO.OUT)
 
     try:
-        # 1. Faz a leitura momentânea do GPS[cite: 2]
-        # Timeout de 2 segundos evita que o programa trave[cite: 2]
         with serial.Serial(port, baud, timeout=2) as ser:
+            ser.reset_input_buffer()
             
-            for _ in range(15): 
+            # Laço de leitura inspirado no seu script funcional
+            for _ in range(30): # Tenta ler por até ~3 segundos
                 if ser.in_waiting > 0:
-                    linha = ser.readline().decode('utf-8').strip()
+                    linha = ser.readline().decode('utf-8', errors='ignore').strip()
                     
-                    if linha and "," in linha and "Aguardando" not in linha:
+                    if linha and linha.startswith('$GPGGA'):
                         partes = linha.split(',')
-                        if len(partes) == 2:
-                            lat = float(partes[0])
-                            lon = float(partes[1])
-                            break  
+                        
+                        # Garante que a linha tem os campos necessários
+                        if len(partes) > 6:
+                            qualidade_sinal = partes[6]
+                            
+                            # '0' = sem sinal, '1' ou '2' = sinal fixado
+                            if qualidade_sinal != '0' and partes[2] and partes[4]:
+                                # Converte as strings NMEA para float decimal
+                                lat = nmea_to_decimal(partes[2], partes[3], is_lon=False)
+                                lon = nmea_to_decimal(partes[4], partes[5], is_lon=True)
+                                break # Achou coordenada válida, sai do laço!
                 
-                time.sleep(0.1) 
+                time.sleep(0.1)
 
-        # 2. Aciona o pino GPIO pelo tempo especificado (bip)[cite: 2]
-        pino_bip.on()  # Substitui GPIO.output(gpio_pin_out, GPIO.HIGH)[cite: 2]
-        time.sleep(bip_ms / 1000.0)  
-        pino_bip.off() # Substitui GPIO.output(gpio_pin_out, GPIO.LOW)[cite: 2]
+        # Dispara o acionamento do GPIO independente se achou sinal ou não
+        GPIO.output(gpio_pin_out, GPIO.HIGH)
+        time.sleep(bip_ms / 1000.0)
+        GPIO.output(gpio_pin_out, GPIO.LOW)
 
     except serial.SerialException as e:
-        print(f"[Erro GPS] Falha na porta serial {port}: {e}")
-    except ValueError:
-        print(f"[Erro GPS] Falha ao converter os dados recebidos.")
+        print(f"[Erro GPS] Erro na porta {port}: {e}")
     except Exception as e:
         print(f"[Erro GPS] Erro inesperado: {e}")
-    finally:
-        # [MUITO IMPORTANTE] No gpiozero, se você instanciar o pino dentro de uma 
-        # função que é chamada várias vezes, precisa usar o .close() para liberá-lo.
-        # Caso contrário, na segunda vez que a função rodar, dará erro de "Pin In Use".
-        pino_bip.close()
     
     return lat, lon
 
 # ==========================================
-# Exemplo de uso:
+# Exemplo de uso local para teste rápido:
 # ==========================================
 if __name__ == "__main__":
     configuracao = {
-        "real_gps": True,       # Chave adicionada para o if inicial funcionar corretamente
         "port": "/dev/serial0",
         "baud": 9600,
-        "gpio_pin_out": 18,     # Pino GPIO 18 (Pino físico 12)[cite: 2]
-        "bip_ms": 200           # 200 milissegundos de pulso[cite: 2]
+        "gpio_pin_out": 18,
+        "bip_ms": 200 
     }
     
     latitude, longitude = get_gps_position(configuracao)
-    print(f"Posição lida - Lat: {latitude}, Lon: {longitude}")
+    if latitude != 0.0:
+        print(f"Posição Decimal - Lat: {latitude} | Lon: {longitude}")
+    else:
+        print("Aguardando precisão dos satélites ou tempo limite excedido.")
