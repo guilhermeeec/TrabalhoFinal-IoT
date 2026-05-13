@@ -170,6 +170,29 @@ cd spectrum_sensor
 python sw_interrupt.py stop
 ```
 
+## Dificuldades encontradas
+
+* Versão certa do pyrtlsdr pro meu HW
+* HW limitado a 2.4MHz de banda
+* Indisponibilidade do módulo GPS para raspberry
+* Baixa qualidade dos botões
+
+## Notas
+
+* Estou usando o Raspberry Pi 4 com etiqueta escrito `2`.
+* Em casa, as características são as seguintes: raspberry `d8:3a:dd:1a:fe:5e 192.168.0.6`
+* No lab, após reinstalar o sistema: raspberry: `146.164.69.232` (não é `171`, pois essa é a Ossos)
+* O Raspberry está configurado para acessar meu roteador do celular. Para saber a rota de saída usada: `ip route get 8.8.8.8`
+* Cópia do Raspberry para a guapimirim da Guapimirim: `scp raspiot:/home/gta/TrabalhoFinal-IoT/spectrum_sensor/data/scan_20260506_164448.csv files_server/test.csv`
+* No raspberry, precisei usar `sudo apt-get -o Acquire::ForceIPv4=true install git-all` para instalar o Git
+* Precisei pelo `raspi-config` configurar o WLAN para meu AndroidAP
+* No meu roteador do celular, o mac foi d8:3a:dd:1a:fe:5`f`
+
+# Lado do servidor
+
+Requisitos:
+- Docker
+
 ## Configuração do servidor de arquivos
 
 Requisito: Docker
@@ -197,17 +220,13 @@ curl -F "file=@test.csv" http://localhost:9632/upload
 
 ## Dificuldades encontradas
 
-* Versão certa do pyrtlsdr pro meu HW
-* HW limitado a 2.4MHz de banda
-* Indisponibilidade do módulo GPS para raspberry
-* Baixa qualidade dos botões
-* 
+* Gerenciamento das redes (interna, roteador Android, DMZ)
 
 ## Notas
 
-* Estou usando o Raspberry Pi 4 com etiqueta escrito `2`.
-* Em casa, as características são as seguintes: raspberry `d8:3a:dd:1a:fe:5e 192.168.0.6`
-* No lab, após reinstalar o sistema: raspberry: `146.164.69.232` (não é `171`, pois essa é a Ossos)
-* O Raspberry está configurado para acessar meu roteador do celular. Para saber a rota de saída usada: `ip route get 8.8.8.8`
-* Cópia do Raspberry para a guapimirim da Guapimirim: `scp raspiot:/home/gta/TrabalhoFinal-IoT/spectrum_sensor/data/scan_20260506_164448.csv files_server/test.csv`
-* No raspberry, precisei usar `sudo apt-get -o Acquire::ForceIPv4=true install git-all` para instalar o Git
+* IP do servidor na rede externa: `146.164.69.90`
+* Teste: `docker run -d --name my-apache-app -p 8080:80 httpd:2.4`
+* Firewall da Angra: `iptables -I forward_new_tcp -p tcp  -d 146.164.69.90 --dport 8080 -j ACCEPT`
+* Interface sem fio da guapimirim: `nmcli device wifi list` e `sudo nmcli dev wifi connect "SSID" password "PASSWORD"`
+* No celular, nas configuraçoes de roteador Wi-Fi, aparece IP de cada dispositivo após clicar no "i". Ex rasp: `10.54.59:102`
+* Precisei reiniciar o celular pro roteador Wi-Fi dar acesso à Internet
