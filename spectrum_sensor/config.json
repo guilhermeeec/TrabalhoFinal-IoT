@@ -1,7 +1,7 @@
 {
     "csv_dir": "./data",
     "interrupt_mode": "hw_interrupt",
-    "server_url": "http://146.164.69.90:9632/upload",
+    "server_url": "http://146.164.69.90:8080/upload",
     "real_gps": true,
     "gpio_pin_start": 17,
     "gpio_pin_stop": 27,

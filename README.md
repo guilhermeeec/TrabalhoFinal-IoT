@@ -211,6 +211,7 @@ Edite as duas primeiras linhas de `files_server/.env`
 cd files_server
 mkdir from_sensors
 mkdir maps
+mkdir matrixes
 ```
 
 Iniciando servidor de teste
@@ -223,7 +224,7 @@ docker logs sdr_upload_server -f
 Enviando arquivo de teste
 
 ```bash
-curl -F "file=@test.csv" http://localhost:9632/upload
+curl -F "file=@test.csv" http://localhost:8080/upload
 ```
 
 ## Dificuldades encontradas
@@ -253,4 +254,8 @@ curl -F "file=@test.csv" http://localhost:9632/upload
 
 ## Parte 2: servidor
 
-* 
+* Acesse o GTA por SSH (recreio/tijuca)
+* Acesse a VM `guiot` por dentro do GTA (IP final 90)
+* Acesse `cd ~/TrabalhoFinal-IoT/files_server` e dê `docker compose up -d`
+* Coloque `http://146.164.69.90/` na URL do navegador no notebook
+

@@ -1,2 +1,9 @@
 Flask==3.0.3
 Werkzeug==3.0.3
+
+numpy
+pandas 
+pykrige
+matplotlib
+scikit-learn
+
