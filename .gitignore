@@ -2,3 +2,4 @@ spectrum_sensor/data/
 __pycache__/
 */__pycache__/
 from_sensors/
+maps/

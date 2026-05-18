@@ -170,6 +170,14 @@ cd spectrum_sensor
 python sw_interrupt.py stop
 ```
 
+## Execução definitiva
+
+```bash
+source ~/.env/bin/activate
+cd spectrum_sensor/
+python main.py
+```
+
 ## Dificuldades encontradas
 
 * Versão certa do pyrtlsdr pro meu HW
@@ -230,3 +238,19 @@ curl -F "file=@test.csv" http://localhost:9632/upload
 * Interface sem fio da guapimirim: `nmcli device wifi list` e `sudo nmcli dev wifi connect "SSID" password "PASSWORD"`
 * No celular, nas configuraçoes de roteador Wi-Fi, aparece IP de cada dispositivo após clicar no "i". Ex rasp: `10.54.59:102`
 * Precisei reiniciar o celular pro roteador Wi-Fi dar acesso à Internet
+
+# Checklist geral
+
+## Parte 1: rede local
+
+* Ligar roteador wi-fi android
+* Ligar raspberry
+* Conectar notebook pessoa no wi-fi
+* Veriricar o IP do raspberry no smartphone
+* Testar no notebook conexão SSH com o raspberry
+* Fazer `source ~/.env/bin/activate`
+* Acessar `cd ~/TrabalhoFinal-IoT/spectrum_sensor` e fazer `python main.py`
+
+## Parte 2: servidor
+
+* 

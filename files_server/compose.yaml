@@ -4,12 +4,14 @@ services:
     container_name: sdr_upload_server
     restart: unless-stopped
     ports:
-      # Mapeia a porta do Host para a porta do Container (ex: 8080:5000)
+      # Mapeia a porta de API (ex: 8080 no host -> 5000 no container)
       - "${HOST_PORT}:${CONTAINER_PORT}"
+      # Mapeia a porta WEB (ex: 80 no host -> 5000 no container)
+      - "${HOST_PORT_WEB}:${CONTAINER_PORT}"
     volumes:
-      # Mapeia a pasta do Host para a pasta do Container
       - "${UPLOAD_DIR_HOST}:${UPLOAD_DIR_CONTAINER}"
+      - "${DOWNLOAD_DIR_HOST}:${DOWNLOAD_DIR_CONTAINER}"
     environment:
-      # Injeta essas variáveis no sistema operacional do container para o app.py ler
       - CONTAINER_PORT=${CONTAINER_PORT}
       - UPLOAD_DIR_CONTAINER=${UPLOAD_DIR_CONTAINER}
+      - DOWNLOAD_DIR_CONTAINER=${DOWNLOAD_DIR_CONTAINER}
