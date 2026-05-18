@@ -151,3 +151,4 @@ def format_dataset_into_matrixes(dataset_name:str):
 
     fname = os.path.join(matrix_path, f"{DATASET_NAME[:-4]}_{channel['dl']}_{channel['ul']}_{channel['bw']}.pickle" )
     write_formatted_matrixes_in_disk(x,y,y_mask,fname)
+    return fname

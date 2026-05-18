@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 
 # Importa a sua função do novo diretório
 from formatter.generate_matrixes import format_dataset_into_matrixes
+from rem_loader.map_loader_helper import REM
 
 app = Flask(__name__)
 
@@ -106,7 +107,7 @@ def index():
 @app.route('/generate/<dataset_name>', methods=['GET'])
 def generate_map(dataset_name):
     # Cria uma thread para processar o mapa sem travar o servidor Flask
-    thread = threading.Thread(target=format_dataset_into_matrixes, args=(f"{dataset_name}.csv",))
+    thread = threading.Thread(target=pipeline, args=(dataset_name,))
     thread.start()
     
     # Retorna uma resposta imediata para o usuário
@@ -155,6 +156,20 @@ def upload_file():
             return f"Upload concluído: {filename}", 200
         except Exception as e:
             return f"Erro ao salvar: {str(e)}", 500
+
+def pipeline(dataset_name: str):
+    dataset_path = os.path.join(f"{dataset_name}.csv")
+    pkl_path = format_dataset_into_matrixes(dataset_path)
+    print(f"{dataset_path} generated {pkl_path}")
+
+    scalar_path = os.path.join(os.path.dirname(__file__), "rem_loader/Scaler.json")
+    print(f"Using scaler from {scalar_path}")
+    rem = REM(path_to_rem_pkl=pkl_path, scaler_path=scalar_path)
+    
+    png_path = os.path.join(DOWNLOAD_FOLDER, f"{os.path.splitext(dataset_name)[0]}.png")
+    print(f"Saving output image to {png_path}")
+    rem.visualize_output(png_path=png_path)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=PORT)

@@ -256,6 +256,14 @@ curl -F "file=@test.csv" http://localhost:8080/upload
 
 * Acesse o GTA por SSH (recreio/tijuca)
 * Acesse a VM `guiot` por dentro do GTA (IP final 90)
+* **Apague o arquivo ~/TrabalhoFinal-IoT/files_server/maps/to_test.png**
 * Acesse `cd ~/TrabalhoFinal-IoT/files_server` e dê `docker compose up -d`
 * Coloque `http://146.164.69.90/` na URL do navegador no notebook
 
+## Parte 3: intergação
+
+* Aperte o botão com fio verde no raspberry e observe o terminal dele
+* Espere alguns segundos e aperte com força o outro botão (fio amarelo)
+* Atualize o navegador e veja se chegou um novo mapa
+* **No mapa to_test**, clique no botão gerar mapa
+* Volte depois de uns 5 segundos e veja se o mapa foi gerado
